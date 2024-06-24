@@ -1,7 +1,50 @@
 const Deposit = require("../models/Deposit");
 const Claim = require("../models/Claim");
+const SwapHistory=require("../models/SwapHistory")
 
 const historyController = {};
+
+
+const Withdraw = require("../models/Withdraw");
+
+// Add these methods to your existing historyController object
+
+historyController.addWithdrawHistory = async (req, res) => {
+  try {
+    const { walletAddress, withdrawAmount, poolId, transactionHash } = req.body;
+    const withdraw = new Withdraw({
+      walletAddress,
+      withdrawAmount,
+      poolId,
+      transactionHash,
+    });
+    await withdraw.save();
+    res
+      .status(200)
+      .json({ message: "Withdraw history added successfully", withdraw });
+  } catch (error) {
+    console.error("Error in addWithdrawHistory:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+historyController.getWithdrawHistory = async (req, res) => {
+  try {
+    const walletAddress = req.query.walletAddress;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const withdraws = await Withdraw.find({ walletAddress })
+      .skip(skip)
+      .limit(limit)
+      .sort({ withdrawDate: -1 });
+    res.status(200).json(withdraws);
+  } catch (error) {
+    console.error("Error in getWithdrawHistory:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 historyController.addDepositHistory = async (req, res) => {
   try {
@@ -22,6 +65,20 @@ historyController.addDepositHistory = async (req, res) => {
     console.error("Error in addDepositHistory:", error);
     res.status(500).json({ message: error.message });
   }
+};
+historyController.addSwapHistory = async (req, res) => {
+   try {
+     const { walletAddress, inAmount, outAmount } = req.body;
+     const swapHistory = new SwapHistory({
+       walletAddress,
+       inAmount,
+       outAmount,
+     });
+     await swapHistory.save();
+     res.status(201).json({message:"Swap History added",swapHistory});
+   } catch (error) {
+     res.status(400).json({ message: error.message });
+   }
 };
 
 historyController.addClaimHistory = async (req, res) => {
@@ -74,4 +131,19 @@ historyController.getClaimHistory = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+historyController.getSwapHistory = async (req, res) => {
+  try {
+    const walletAddress = req.query.walletAddress;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const claims = await SwapHistory.find({ walletAddress }).skip(skip).limit(limit);
+    res.status(200).json(claims);
+  } catch (error) {
+    console.error("Error in get Swap History:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = historyController;

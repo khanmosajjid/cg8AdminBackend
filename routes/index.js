@@ -1,10 +1,10 @@
 const router = require("express").Router();
-const userRoute=require('./userRoutes');
-const historyRoute=require('./historyRoutes')
+const userRoute = require("./userRoutes");
+const historyRoute = require("./historyRoutes");
+
 const middleware = require("./middleware");
 
-router.use('/user',userRoute);
-router.use('/history',historyRoute)
+router.use("/user", userRoute);
+router.use("/history", historyRoute);
 
-
-module.exports=router;
+module.exports = router;
